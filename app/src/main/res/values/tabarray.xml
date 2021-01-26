@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="tab">
+        <item>用户列表</item>
+        <item>人员搜索</item>
+    </string-array>
+    <string-array name="step">
+        <item>个人信息</item>
+        <item>充值</item>
+        <item>开户成功</item>
+    </string-array>
+    <string-array name="devicepattern">
+        <item>手动消费</item>
+        <item>自动消费</item>
+        <item>定值消费</item>
+    </string-array>
+</resources>

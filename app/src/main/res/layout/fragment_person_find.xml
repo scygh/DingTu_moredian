@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_80"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/height_80"
+            android:gravity="center_vertical"
+            android:padding="@dimen/padding_10">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="@dimen/height_40"
+                android:layout_weight="1"
+                android:src="@mipmap/sousuo" />
+
+            <EditText
+                android:id="@+id/fpf_find_et"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/height_60"
+                android:layout_weight="9"
+                android:background="@color/white"
+                android:hint="按名字搜索"
+                android:paddingLeft="@dimen/margin_20"
+                android:singleLine="true"
+                android:textSize="@dimen/textSize_26" />
+
+            <ImageView
+                android:id="@+id/fpf_find_clear"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/height_40"
+                android:layout_weight="1"
+                android:src="@mipmap/clear"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/color_grey" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/person_manage_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </android.support.v7.widget.RecyclerView>
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <include
+            layout="@layout/loading_layout"
+            android:layout_width="@dimen/width_100"
+            android:layout_height="@dimen/height_100"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+</LinearLayout>
