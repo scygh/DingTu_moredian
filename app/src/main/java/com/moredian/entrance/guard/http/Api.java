@@ -4,6 +4,7 @@ import com.blankj.utilcode.util.SPUtils;
 
 import com.moredian.entrance.guard.constant.Constants;
 import com.moredian.entrance.guard.entity.ApiUserGet;
+import com.moredian.entrance.guard.entity.BaseResponseAddisOK;
 import com.moredian.entrance.guard.entity.GetCardPassword;
 import com.moredian.entrance.guard.entity.GetCardTypeList;
 import com.moredian.entrance.guard.entity.GetChannel;
@@ -18,6 +19,8 @@ import com.moredian.entrance.guard.entity.GetSubsidyLevel;
 import com.moredian.entrance.guard.entity.GetTokenRes;
 import com.moredian.entrance.guard.entity.GetUserByUserID;
 import com.moredian.entrance.guard.entity.MemberCreateReq;
+import com.moredian.entrance.guard.entity.PostRechargeReq;
+import com.moredian.entrance.guard.entity.PostRechargeRes;
 import com.moredian.entrance.guard.entity.PostResponse;
 import com.moredian.entrance.guard.entity.MemberDeleteReq;
 import com.moredian.entrance.guard.entity.MemberUpdateReq;
@@ -318,6 +321,45 @@ public class Api {
                 });
     }
 
+    /**
+     * descirption: 按卡号获取用户
+     */
+    public void getUser(String token, String userid) {
+        ApiUtils.getUser().getUser(token, userid, true)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ApiUserGet>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ApiUserGet user) {
+                        if (user != null && user.getStatusCode() == 200) {
+                            if (getResponseListener != null) {
+                                getResponseListener.onRespnse(user);
+                            }
+                        } else {
+                            ToastHelper.showToast(user.getMessage());
+                            if (user.getMessage().equals("Parameter error: number ")) {
+                                ToastHelper.showToast("卡号错误");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        errorExecute(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
 
     /**
      * descirption: 人脸支付
@@ -358,43 +400,6 @@ public class Api {
                 });
     }
 
-
-    /**
-     * descirption: 按userID查询消费者
-     */
-    public void getUserByuserID(String userID, String token) {
-        ApiUtils.getUserByUserIdService().GetByUserID(userID, token)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetUserByUserID>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(GetUserByUserID user) {
-                        if (user != null && user.getStatusCode() == 200) {
-                            ToastHelper.showToast("查询成功");
-                            if (getResponseListener != null) {
-                                getResponseListener.onRespnse(user);
-                            }
-                        } else {
-                            ToastHelper.showToast(user.getMessage());
-                        }
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        errorExecute(e);
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
 
     /**
      * descirption: 开户
@@ -616,45 +621,6 @@ public class Api {
     }
 
     /**
-     * descirption: 按卡号获取用户
-     */
-    public void getUser(String token, String userid) {
-        ApiUtils.getUser().getUser(token, userid, true)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<ApiUserGet>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(ApiUserGet user) {
-                        if (user != null && user.getStatusCode() == 200) {
-                            if (getResponseListener != null) {
-                                getResponseListener.onRespnse(user);
-                            }
-                        } else {
-                            ToastHelper.showToast(user.getMessage());
-                            if (user.getMessage().equals("Parameter error: number ")) {
-                                ToastHelper.showToast("卡号错误");
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        errorExecute(e);
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
-
-    /**
      * descirption: 充值渠道
      */
     public void getChannel(String token) {
@@ -694,18 +660,18 @@ public class Api {
     /**
      * descirption: 充值
      */
-    public void postDeposit(String token, PostDepositBody postDepositBody) {
-        ApiUtils.postDeposit().deposit(postDepositBody, token)
+    public void postDeposit(int company, int id, PostRechargeReq refundRequest, String token) {
+        ApiUtils.postDeposit().recharge(company, id, refundRequest, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<PostResponseNoContent>() {
+                .subscribe(new Observer<BaseResponseAddisOK<PostRechargeRes>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(PostResponseNoContent postResponseNoContent) {
+                    public void onNext(BaseResponseAddisOK<PostRechargeRes> postResponseNoContent) {
                         if (postResponseNoContent != null && postResponseNoContent.getStatusCode() == 200) {
                             AudioUtils.getInstance().speakText("充值成功");
                             if (getResponseListener != null) {
@@ -945,7 +911,6 @@ public class Api {
                     @Override
                     public void onNext(GetDevicePattern pattern) {
                         if (pattern != null && pattern.getStatusCode() == 200) {
-                            ToastHelper.showToast("获取消费模式成功");
                             if (getResponseListener != null) {
                                 getResponseListener.onRespnse(pattern);
                             }

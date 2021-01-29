@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+
 import com.blankj.utilcode.util.SPUtils;
 import com.moredian.entrance.guard.constant.Constants;
 import com.moredian.entrance.guard.R;
@@ -46,7 +47,7 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     public void initData() {
-        //显示保存的用户名和密码
+        //选中保存用户名密码后，展示sp保存的用户名和密码。
         String existsUsername = SPUtils.getInstance().getString(Constants.USRTNAME, "");
         String existsPassword = SPUtils.getInstance().getString(Constants.PASSWORD, "");
         if (!TextUtils.isEmpty(existsUsername) && !TextUtils.isEmpty(existsPassword)) {
@@ -67,16 +68,15 @@ public class LoginActivity extends BaseActivity {
             public void onRespnse(Object o) {
                 if (o instanceof GetDevicePattern) {
                     int devicePattern = ((GetDevicePattern) o).getContent().getPattern();
-                    String pattern = "";
                     if (devicePattern == 1) {
-                        pattern = "手动消费";
+
                     } else if (devicePattern == 2) {
-                        pattern = "自动消费";
-                        SPUtils.getInstance().put(Constants.AUTO_AMOUNT, ((GetDevicePattern) o).getContent().getAutoAmount(),true);
+
+                        SPUtils.getInstance().put(Constants.AUTO_AMOUNT, ((GetDevicePattern) o).getContent().getAutoAmount(), true);
                     } else if (devicePattern == 3) {
-                        pattern = "定值消费";
+
                     }
-                    SPUtils.getInstance().put(Constants.DEVICE_PATTERN, pattern);
+                    SPUtils.getInstance().put(Constants.DEVICE_PATTERN, devicePattern);
                     startActivity(DsyActivity.getDsyActivityIntent(LoginActivity.this));
                     finish();
                 }

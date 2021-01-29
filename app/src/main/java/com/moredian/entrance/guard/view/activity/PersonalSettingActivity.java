@@ -53,26 +53,29 @@ public class PersonalSettingActivity extends BaseActivity {
         }
     }
 
-    @OnClick({ R.id.aps_rl1, R.id.aps_rl2, R.id.aps_rl3, R.id.aps_rl4})
+    @OnClick({R.id.aps_about, R.id.aps_checkforupdate, R.id.aps_clearcahce, R.id.aps_logout, R.id.aps_machinesetting, R.id.aps_netsetting})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.aps_rl1:
+            case R.id.aps_about:
                 ToastHelper.showToast("我是一个支付的机器");
                 break;
-            case R.id.aps_rl2:
+            case R.id.aps_clearcahce:
                 //清除缓存
                 CleanDataUtils.clearAllCache(this);
                 clearCache();
                 break;
-            case R.id.aps_rl3:
+            case R.id.aps_logout:
                 startActivity(LoginActivity.getLoginActivityIntent(this));
                 SPUtils.getInstance().put(Constants.ISLOGIN, false);
                 finish();
                 break;
-            case R.id.aps_rl4:
-                startActivity(LoginActivity.getLoginActivityIntent(this));
-                SPUtils.getInstance().put(Constants.ISLOGIN, false);
-                finish();
+            case R.id.aps_machinesetting:
+                startActivity(MachinesettingActivity.getMachinesettingActivityIntent(this));
+                break;
+            case R.id.aps_netsetting:
+                startActivity(NetSettingActivity.getNetSettingActivityIntent(this));
+                break;
+            case R.id.aps_checkforupdate:
                 break;
         }
     }

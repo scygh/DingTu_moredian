@@ -51,7 +51,7 @@ public class PersonManageRvAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.tv_wifiname)
+        @BindView(R.id.tv_name)
         TextView tvUsername;
         @BindView(R.id.tv_user_state)
         TextView tvUserstate;

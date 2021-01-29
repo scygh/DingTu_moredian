@@ -10,7 +10,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/height_80"
-        android:background="@color/colorPrimaryDark">
+        android:background="@color/white">
 
         <TextView
             android:layout_width="wrap_content"
@@ -18,7 +18,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/margin_40"
             android:text="WLAN"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/textColorPrimary"
             android:textSize="@dimen/textSize_28" />
 
         <Switch

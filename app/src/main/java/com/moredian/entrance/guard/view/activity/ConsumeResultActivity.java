@@ -85,23 +85,8 @@ public class ConsumeResultActivity extends BaseActivity {
             csAmountSmall.setText(facecontentbean.getExpenseDetail().getAmount() + "");
             csBalance.setText(facecontentbean.getExpenseDetail().getBalance() + "");
             csDate.setText(time);
-            int partern = facecontentbean.getExpenseDetail().getPattern();
             csConsumeKind.setText("人脸支付");
-            if (partern == 1) {
-                csConsumePattern.setText("手动消费");
-            } else if (partern == 2) {
-                csConsumePattern.setText("自动消费");
-            } else if (partern == 3) {
-                csConsumePattern.setText("定值消费");
-            } else if (partern == 4) {
-                csConsumePattern.setText("商品消费");
-            } else if (partern == 5) {
-                csConsumePattern.setText("机器充值");
-            } else if (partern == 6) {
-                csConsumePattern.setText("机器退款");
-            } else if (partern == 7) {
-                csConsumePattern.setText("订餐模式");
-            }
+            csConsumePattern.setText("自动消费");
         } else {
             csConsumeResult.setText("支付失败");
             csConsumeResult.setTextColor(getResources().getColor(R.color.red));

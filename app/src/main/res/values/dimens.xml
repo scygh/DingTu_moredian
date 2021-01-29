@@ -36,6 +36,7 @@
     <dimen name="width_200">200dp</dimen>
     <dimen name="width_250">250dp</dimen>
     <dimen name="width_400">400dp</dimen>
+    <dimen name="width_600">600dp</dimen>
 
     <dimen name="margin_8">8dp</dimen>
     <dimen name="margin_10">10dp</dimen>

@@ -1,9 +1,7 @@
 package com.moredian.entrance.guard.view.activity;
 
-import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.view.WindowManager;
 
 import com.blankj.utilcode.util.SPUtils;
 import com.moredian.entrance.guard.constant.Constants;
@@ -14,7 +12,6 @@ import com.moredian.entrance.guard.utils.ToastHelper;
 
 public class SplashActivity extends BaseActivity {
 
-    private String pattern = "";
 
     @Override
     public int layoutView() {
@@ -28,25 +25,24 @@ public class SplashActivity extends BaseActivity {
 
     @Override
     public void initData() {
-        //如果登录过了才会在这个界面去请求消费模式
+        //如果登录过了才会在这个界面去请求消费模式，来供识别界面使用。
         if (!TextUtils.isEmpty(token)) {
             api.getDevicePattern(Integer.parseInt(deviceId), token);
         }
-        //接收到返回后去设置消费模式，保存自动消费的金额
+        //接收到返回后去保存消费模式，并且保存自动消费的金额到sharedPrefrence。
         api.setGetResponseListener(new Api.GetResponseListener() {
             @Override
             public void onRespnse(Object o) {
                 if (o instanceof GetDevicePattern) {
                     int devicePattern = ((GetDevicePattern) o).getContent().getPattern();
                     if (devicePattern == 1) {
-                        pattern = "手动消费";
+
                     } else if (devicePattern == 2) {
-                        pattern = "自动消费";
                         SPUtils.getInstance().put(Constants.AUTO_AMOUNT, ((GetDevicePattern) o).getContent().getAutoAmount(), true);
                     } else if (devicePattern == 3) {
-                        pattern = "定值消费";
+
                     }
-                    SPUtils.getInstance().put(Constants.DEVICE_PATTERN, pattern);
+                    SPUtils.getInstance().put(Constants.DEVICE_PATTERN, devicePattern);
                 }
             }
 

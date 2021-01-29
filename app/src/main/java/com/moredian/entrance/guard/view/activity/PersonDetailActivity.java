@@ -96,7 +96,7 @@ public class PersonDetailActivity extends BaseActivity {
 
 
     /**
-     * descirption: 得到查询界面需要的intent
+     * descirption: 得到详情界面需要的intent
      */
     public static Intent getPersonDetailActivityIntent(Context context, String userid) {
         Intent intent = new Intent(context, PersonDetailActivity.class);
@@ -142,22 +142,11 @@ public class PersonDetailActivity extends BaseActivity {
         //根据Intent userID 查询用户信息。
         dataIntent = getIntent();
         userid = dataIntent.getStringExtra(Constants.INTENT_ROWSBEAN_BEAN);
-        if (!TextUtils.isEmpty(userid)) {
-            api.getUser(token, userid);
-        } else {
-            ToastHelper.showToast("userid为空");
-        }
+        api.getUser(token, userid);
         api.setGetResponseListener(new Api.GetResponseListener() {
             @Override
             public void onRespnse(Object o) {
-                if (o instanceof GetUserByUserID) {
-                    //查询到了用户信息去删除用户
-                    PostDeregister postDeregister = new PostDeregister();
-                    postDeregister.setCost(((GetUserByUserID) o).getContent().getCost());
-                    postDeregister.setMoney(((GetUserByUserID) o).getContent().getCash());
-                    postDeregister.setUserID(((GetUserByUserID) o).getContent().getUserID());
-                    api.postDeRegister(postDeregister, token);
-                } else if (o instanceof PostResponse) {
+                if (o instanceof PostResponse) {
                     //如果是删除人脸成功了，就清空ExitMemberId,删除 照片
                     handler.sendEmptyMessage(2);
                 } else if (o instanceof ApiUserGet) {//根据userid查询成功了则去设置信息
@@ -176,19 +165,11 @@ public class PersonDetailActivity extends BaseActivity {
         api.setOnCreate(new Api.OnCreate() {
             @Override
             public void created() {
-                updateCheck();
+                updatePerson();
             }
         });
     }
 
-    /**
-     * descirption: 设置头像
-     */
-    private void GlideIn() {
-        RoundedCorners roundedCorners = new RoundedCorners(30);
-        RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(300, 300);
-        Glide.with(this).load(bitmap).apply(options).into(persondetailCamera);
-    }
 
     /**
      * descirption: 查询后设置数据,保存已存在人脸的id
@@ -246,7 +227,11 @@ public class PersonDetailActivity extends BaseActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         deletePerson();//删除魔点人员
-                        api.getUserByuserID(findbean.getUser().getId(), token);//查询到了删除平台人员
+                        PostDeregister postDeregister = new PostDeregister();
+                        postDeregister.setCost(findbean.getCard().getCost());
+                        postDeregister.setMoney(findbean.getFinances().get(0).getBalance());
+                        postDeregister.setUserID(findbean.getUser().getId());
+                        api.postDeRegister(postDeregister, token);
                     }
                 })
                 .setCancelable(true)
@@ -257,13 +242,9 @@ public class PersonDetailActivity extends BaseActivity {
      * descirption: 删除创建
      */
     private void deletePerson() {
-        if (!TextUtils.isEmpty(userid)) {
-            if (findbean != null) {
-                MemberDeleteReq postRequestBody = new MemberDeleteReq(findbean.getUser().getId());
-                api.postDelete(postRequestBody, token, Constants.MODIAN_TOKEN);
-            }
-        } else {
-            ToastUtils.showShort("userid 为空");
+        if (findbean != null) {
+            MemberDeleteReq postRequestBody = new MemberDeleteReq(findbean.getUser().getId());
+            api.postDelete(postRequestBody, token, Constants.MODIAN_TOKEN);
         }
     }
 
@@ -271,13 +252,9 @@ public class PersonDetailActivity extends BaseActivity {
      * descirption: 创建人员
      */
     private synchronized void createPerson() {
-        if (!TextUtils.isEmpty(userid)) {
-            MemberCreateReq postRequestBody = new MemberCreateReq(findbean.getUser().getId(), findbean.getUser().getName(),
-                    findbean.getUser().getPhone());
-            api.postCreate(postRequestBody, SPUtils.getInstance().getString(Constants.ACCESSTOKEN), Constants.MODIAN_TOKEN);
-        } else {
-            ToastUtils.showShort("userid 为空");
-        }
+        MemberCreateReq postRequestBody = new MemberCreateReq(findbean.getUser().getId(), findbean.getUser().getName(),
+                findbean.getUser().getPhone());
+        api.postCreate(postRequestBody, SPUtils.getInstance().getString(Constants.ACCESSTOKEN), Constants.MODIAN_TOKEN);
     }
 
     /**
@@ -286,16 +263,12 @@ public class PersonDetailActivity extends BaseActivity {
     private void createCheck() {
         if (TextUtils.isEmpty(exitmemberId)) {//已创建就不会再创建
             if (bitmap != null) {
-                if (TextUtils.isEmpty(memberId)) {//如果被识别出来，就说明已经录入了
-                    createPerson();
-                } else {
-                    ToastHelper.showToast("已添加人脸！");
-                }
+                createPerson();
             } else {
-                ToastHelper.showToast("请先录入人脸");
+                ToastHelper.showToast("捕捉的人脸图片为空");
             }
         } else {
-            ToastHelper.showToast("已添加人脸");
+            ToastHelper.showToast("该用户已添加人脸");
         }
     }
 
@@ -313,38 +286,22 @@ public class PersonDetailActivity extends BaseActivity {
         }
     }
 
-    private void updateCheck() {
-        if (TextUtils.isEmpty(exitmemberId)) {//已创建就不会再更新
-            if (bitmap != null) {
-                if (TextUtils.isEmpty(memberId)) {//如果被识别出来，就说明已经入了
-                    updatePerson();
-                } else {
-                    ToastHelper.showToast("已添加人脸！");
-                }
-            } else {
-                ToastHelper.showToast("请先录入人脸");
-            }
-        } else {
-            ToastHelper.showToast("已添加人脸！");
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == Constants.FACE_INPUT_REQUESTCODE && resultCode == Constants.FACE_INPUT_RESULTCODE) {
             byte[] image = data.getByteArrayExtra(Constants.INTENT_FACEINPUT_RGBDATA);
             memberId = data.getStringExtra(Constants.INTENT_FACEINPUT_MEMBERID);
-            if (!TextUtils.isEmpty(memberId)) {
+            if (!TextUtils.isEmpty(memberId)) {//已经录入过的人脸识别到了memberid
                 if (!TextUtils.isEmpty(exitmemberId)) {
-                    if (memberId == exitmemberId) {
+                    if (memberId == exitmemberId) {//是否是同一个人
                         istheSameFace = true;
                     }
                 }
+                ToastHelper.showToast("你已经录入过人脸了");
+            } else {//没录入的就去设置头像，创建人员
                 setImage(image);
-            } else {
-                setImage(image);
+                createCheck();
             }
-            createCheck();
         }
     }
 
@@ -354,6 +311,16 @@ public class PersonDetailActivity extends BaseActivity {
             GlideIn();
         }
     }
+
+    /**
+     * descirption: 设置头像
+     */
+    private void GlideIn() {
+        RoundedCorners roundedCorners = new RoundedCorners(30);
+        RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(300, 300);
+        Glide.with(this).load(bitmap).apply(options).into(persondetailCamera);
+    }
+
 
     @Override
     protected void onDestroy() {

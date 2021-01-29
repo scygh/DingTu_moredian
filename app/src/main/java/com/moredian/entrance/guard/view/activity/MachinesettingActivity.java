@@ -29,12 +29,6 @@ public class MachinesettingActivity extends BaseActivity {
 
     @BindView(R.id.machinesetting_machine_number)
     Spinner machinesettingMachineNumber;
-    @BindView(R.id.machinesetting_port)
-    Spinner machinesettingPort;
-    @BindView(R.id.machinesetting_baudrate)
-    EditText machinesettingBaudrate;
-    @BindView(R.id.persondetail_sure)
-    Button persondetailSure;
     @BindView(R.id.machinesetting_device_pattern)
     Spinner machinesettingDevicePattern;
     private List<String> deviceNums = new ArrayList<>();
@@ -109,14 +103,6 @@ public class MachinesettingActivity extends BaseActivity {
 
     }
 
-
-    @OnClick({R.id.persondetail_sure})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.persondetail_sure:
-                break;
-        }
-    }
 
     @Override
     protected void onStop() {

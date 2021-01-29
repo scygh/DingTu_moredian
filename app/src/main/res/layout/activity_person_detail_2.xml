@@ -145,7 +145,8 @@
             android:gravity="center"
             android:text="充值"
             android:textColor="@color/textColorPrimary"
-            android:textSize="@dimen/textSize_26" />
+            android:textSize="@dimen/textSize_26"
+            android:visibility="gone"/>
 
 
         <TextView

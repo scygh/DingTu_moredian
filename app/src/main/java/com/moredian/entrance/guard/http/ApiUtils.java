@@ -24,6 +24,7 @@ import com.moredian.entrance.guard.http.retrofit.PostDeRegister;
 import com.moredian.entrance.guard.http.retrofit.PostDelete;
 import com.moredian.entrance.guard.http.retrofit.PostDeposit;
 import com.moredian.entrance.guard.http.retrofit.PostMoreDianExpense;
+import com.moredian.entrance.guard.http.retrofit.PostRecharge;
 import com.moredian.entrance.guard.http.retrofit.PostRefund;
 import com.moredian.entrance.guard.http.retrofit.PostRegister;
 import com.moredian.entrance.guard.http.retrofit.PostSetDevicePattern;
@@ -146,8 +147,8 @@ public class ApiUtils {
     /**
      * descirption:充值
      */
-    public static PostDeposit postDeposit() {
-        return RetrofitClient.getClient(BASE_URL).create(PostDeposit.class);
+    public static PostRecharge postDeposit() {
+        return RetrofitClient.getClient(BASE_URL).create(PostRecharge.class);
     }
 
     /**

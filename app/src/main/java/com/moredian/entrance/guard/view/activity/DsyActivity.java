@@ -118,8 +118,6 @@ public class DsyActivity extends BaseActivity {
 
     private MyReceiver mReceiver = new MyReceiver();
     private String username;
-    /*    private List<GetMealList.ContentBean> datas = new ArrayList<>();
-        private List<String[]> times = new ArrayList<>();*/
     private LoadingDailog dialog;
 
 
@@ -136,17 +134,22 @@ public class DsyActivity extends BaseActivity {
 
     @Override
     public void initView() {
-        //沉浸式
-        if (Build.VERSION.SDK_INT >= 21) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            getWindow().setStatusBarColor(Color.TRANSPARENT);
-        }
-        if (!TextUtils.isEmpty(pattern)) {
-            if (pattern.equals("自动消费")) {
-                tvMoney.setText(SPUtils.getInstance().getFloat(Constants.AUTO_AMOUNT) + "");
+        able_switch.setChecked(true);
+        able_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    ableTag = true;
+                } else {
+                    ableTag = false;
+                }
             }
+        });
+        //自动消费显示消费金额
+        if (pattern == 2) {
+            tvMoney.setText(SPUtils.getInstance().getFloat(Constants.AUTO_AMOUNT) + "");
         }
+        //下拉刷新重新获取消费模式和自动消费金额
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -157,17 +160,6 @@ public class DsyActivity extends BaseActivity {
                         refreshLayout.setRefreshing(false);
                     }
                 }, 1000);
-            }
-        });
-        able_switch.setChecked(true);
-        able_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    ableTag = true;
-                } else {
-                    ableTag = false;
-                }
             }
         });
     }
@@ -188,6 +180,18 @@ public class DsyActivity extends BaseActivity {
     }
 
     /**
+     * descirption: 初始化广播
+     */
+    private void initReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constants.DETECT_RESULT_ACTION);
+        filter.addAction(Constants.NIR_RESULT_ACTION);
+        filter.addAction(Constants.OFFLINE_RECOGNIZE_ACTION);
+        filter.addAction(Constants.ONLINE_RECOGNIZE_ACTION);
+        registerReceiver(mReceiver, filter);
+    }
+
+    /**
      * descirption: 初始化相机
      */
     private void initCamera() {
@@ -204,17 +208,6 @@ public class DsyActivity extends BaseActivity {
         }
     }
 
-    /**
-     * descirption: 初始化广播
-     */
-    private void initReceiver() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Constants.DETECT_RESULT_ACTION);
-        filter.addAction(Constants.NIR_RESULT_ACTION);
-        filter.addAction(Constants.OFFLINE_RECOGNIZE_ACTION);
-        filter.addAction(Constants.ONLINE_RECOGNIZE_ACTION);
-        registerReceiver(mReceiver, filter);
-    }
 
     /**
      * descirption: 初始化请求返回
@@ -227,21 +220,19 @@ public class DsyActivity extends BaseActivity {
                     AudioUtils.getInstance().speakText("支付" + ((MoredianExpense) o).getContent().getExpenseDetail().getAmount() + "元");
                     startActivity(ConsumeResultActivity.getFaceConsumeSuccessActivityIntent(DsyActivity.this, ((MoredianExpense) o).getContent()));
                     updateText(((MoredianExpense) o).getContent().getExpenseDetail().getUserId(), ((MoredianExpense) o).getContent().getExpenseDetail().getBalance());
-                } else if (o instanceof GetDevicePattern) {
+                } else if (o instanceof GetDevicePattern) {//重新获取消费模式和自动金额
                     int devicePattern = ((GetDevicePattern) o).getContent().getPattern();
                     if (devicePattern == 1) {
-                        pattern = "手动消费";
+
                     } else if (devicePattern == 2) {
-                        pattern = "自动消费";
                         SPUtils.getInstance().put(Constants.AUTO_AMOUNT, ((GetDevicePattern) o).getContent().getAutoAmount(), true);
                     } else if (devicePattern == 3) {
-                        pattern = "定值消费";
+
                     }
-                    SPUtils.getInstance().put(Constants.DEVICE_PATTERN, pattern);
-                    if (!TextUtils.isEmpty(pattern)) {
-                        if (pattern.equals("自动消费")) {
-                            tvMoney.setText(SPUtils.getInstance().getFloat(Constants.AUTO_AMOUNT) + "");
-                        }
+                    SPUtils.getInstance().put(Constants.DEVICE_PATTERN, devicePattern);
+                    pattern = devicePattern;
+                    if (pattern == 2) {
+                        tvMoney.setText(SPUtils.getInstance().getFloat(Constants.AUTO_AMOUNT) + "");
                     }
                 }
             }
@@ -254,6 +245,20 @@ public class DsyActivity extends BaseActivity {
     }
 
     /**
+     * descirption: 更新数据
+     */
+    private void updateText(String name, double balance) {
+        Message message = Message.obtain();
+        Bundle bundle = new Bundle();
+        bundle.putString("name", name);
+        bundle.putDouble("balance", balance);
+        message.setData(bundle);
+        message.what = Constants.KEY_SET_TEXT;
+        mHandler.sendMessage(message);
+        mHandler.sendEmptyMessageDelayed(Constants.KEY_CLEAR, 3000);
+    }
+
+    /**
      * descirption: 人脸消费
      */
     private void faceConsume() {
@@ -261,11 +266,11 @@ public class DsyActivity extends BaseActivity {
             if (ableTag) {
                 String money = tvMoney.getText().toString();
                 if (Double.parseDouble(money) > 0) {
-                    if (p == 2) {
+                    if (pattern == 2) {
                         AudioUtils.getInstance().speakText("请确认支付金额");
                         initDialog(money);
                     } else {
-                        ToastHelper.showToast("请先设置到自动模式");
+                        ToastHelper.showToast("消费模式错误");
                     }
                 } else {
                     ToastHelper.showToast("金额必须大于零才能消费");
@@ -274,11 +279,13 @@ public class DsyActivity extends BaseActivity {
                 ToastHelper.showToast("请先打开消费开关");
             }
         } else {
-            ToastHelper.showToast("人脸未录入");
+            ToastHelper.showToast("memberId为空");
         }
     }
 
-    //消费确认弹窗
+    /**
+     * descirption: 确认支付弹窗
+     */
     private ComonDialog comonDialog;
 
     private void initDialog(String money) {
@@ -305,18 +312,223 @@ public class DsyActivity extends BaseActivity {
         }).show();
     }
 
-    /**
-     * descirption: 更新数据
-     */
-    private void updateText(String name, double balance) {
-        Message message = Message.obtain();
-        Bundle bundle = new Bundle();
-        bundle.putString("name", name);
-        bundle.putDouble("balance", balance);
-        message.setData(bundle);
-        message.what = Constants.KEY_SET_TEXT;
-        mHandler.sendMessage(message);
-        mHandler.sendEmptyMessageDelayed(Constants.KEY_CLEAR, 3000);
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case Constants.KEY_CLEAR:
+                    tvUsername.setText("");
+                    tvUsername.setHint("请先识别");
+                    tvBalance.setText("");
+                    tvBalance.setHint("请先识别");
+                    tvMoney.setText("");
+                    tvMoney.setHint("刷脸支付");
+                    break;
+                case Constants.KEY_SET_TEXT:
+                    String name = msg.getData().getString("name");
+                    double balance = msg.getData().getDouble("balance");
+                    tvUsername.setText(name.substring(0, 10));
+                    tvBalance.setText(balance + "元");
+                    break;
+                //如果人脸识别已打开，红外生物识别获取焦点，如果没打开则延迟重来
+                case Constants.KEY_OPEN_NIR_CAMERA:
+                    if (mRgbCameraView != null) {
+                        if (mRgbCameraView.hasOpened()) {
+                            mNirCameraView.onResume();
+                            mHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dialog.dismiss();
+                                }
+                            }, 2000);
+                        } else {
+                            mCheckRgbCameraOpenCount++;
+                            mHandler.sendEmptyMessageDelayed(Constants.KEY_OPEN_NIR_CAMERA, Constants.OPEN_MIR_CAMERA_DELAY + mCheckRgbCameraOpenCount * 1000);
+                        }
+                    }
+                    break;
+                //隐藏显示的文字
+                case Constants.KEY_DETECT_HIDE:
+                    mHandler.removeMessages(Constants.KEY_DETECT_HIDE);
+                    Log.e(TAG, "hide detect result");
+                    if (mDetectResultView.getVisibility() != View.GONE) {
+                        mDetectResultView.setVisibility(View.GONE);
+                    }
+                    break;
+                //靠近一点提醒，后隐藏
+                case Constants.KEY_DETECT_FACE_SIZE_ERROR:
+                    mHandler.removeMessages(Constants.KEY_DETECT_FACE_SIZE_ERROR);
+                    Log.e(TAG, "face size incorrect");
+                    if (!Constants.SIZE_INCORRECT_TIPS.equals(mDetectResultView.getText())) {
+                        mDetectResultView.setText(Constants.SIZE_INCORRECT_TIPS);
+                    }
+                    if (mDetectResultView.getVisibility() != View.VISIBLE) {
+                        mDetectResultView.setVisibility(View.VISIBLE);
+                    }
+                    mHandler.sendEmptyMessageDelayed(Constants.KEY_DETECT_HIDE, 2000);
+                    break;
+                //摆正提醒，后隐藏
+                case Constants.KEY_DETECT_FACE_ANGLE_ERROR:
+                    mHandler.removeMessages(Constants.KEY_DETECT_FACE_ANGLE_ERROR);
+                    Log.e(TAG, "face angle incorrect");
+                    if (!Constants.ANGLE_INCORRECT_TIPS.equals(mDetectResultView.getText())) {
+                        mDetectResultView.setText(Constants.ANGLE_INCORRECT_TIPS);
+                    }
+                    if (mDetectResultView.getVisibility() != View.VISIBLE) {
+                        mDetectResultView.setVisibility(View.VISIBLE);
+                    }
+                    mHandler.sendEmptyMessageDelayed(Constants.KEY_DETECT_HIDE, 2000);
+                    break;
+                //提醒保持静止提醒，后隐藏
+                case Constants.KEY_DETECT_FACE_QUALITY_ERROR:
+                    mHandler.removeMessages(Constants.KEY_DETECT_FACE_QUALITY_ERROR);
+                    Log.e(TAG, "face quality incorrect");
+                    if (!Constants.QUALITY_INCORRECT_TIPS.equals(mDetectResultView.getText())) {
+                        mDetectResultView.setText(Constants.QUALITY_INCORRECT_TIPS);
+                    }
+                    if (mDetectResultView.getVisibility() != View.VISIBLE) {
+                        mDetectResultView.setVisibility(View.VISIBLE);
+                    }
+                    mHandler.sendEmptyMessageDelayed(Constants.KEY_DETECT_HIDE, 2000);
+                    break;
+                //显示识别获取的名字后隐藏
+                case Constants.KEY_DETECT_USER_NAME:
+                    mHandler.removeMessages(Constants.KEY_DETECT_USER_NAME);
+                    String username = msg.getData().getString(Constants.USER_NAME);
+                    if (!username.equals(mDetectResultView.getText())) {
+                        mDetectResultView.setText(username);
+                    }
+                    if (mDetectResultView.getVisibility() != View.VISIBLE) {
+                        mDetectResultView.setVisibility(View.VISIBLE);
+                    }
+                    mHandler.sendEmptyMessageDelayed(Constants.KEY_DETECT_HIDE, 2000);
+                    faceConsume();
+                    break;
+                default:
+                    break;
+            }
+            super.handleMessage(msg);
+        }
+    };
+
+    public class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            //判断是否有信息
+            if (action != null && !action.equals("")) {
+                boolean status = intent.getBooleanExtra(Constants.CHECK_STATUS, false);
+                rgb_data = intent.getByteArrayExtra(Constants.RGB_DATA);
+                // 彩色摄像头抓到的人脸
+                if (rgb_data != null && rgb_data.length > 0) {
+                    Bitmap rgbBitmap = BitmapFactory.decodeByteArray(rgb_data, 0, rgb_data.length);
+                    mRgbFaceView.setImageBitmap(rgbBitmap);
+                    if (mShowCallbackFace) {
+                        mRgbFaceView.setVisibility(View.VISIBLE);
+                    }
+                }
+                //红外摄像头抓到的人脸
+                byte[] nir_data = intent.getByteArrayExtra(Constants.NIR_DATA);
+                if (nir_data != null && nir_data.length > 0) {
+                    Bitmap rgbBitmap = BitmapFactory.decodeByteArray(nir_data, 0, nir_data.length);
+                    mNirFaceView.setImageBitmap(rgbBitmap);
+                    if (mShowCallbackFace) {
+                        mNirFaceView.setVisibility(View.VISIBLE);
+                    }
+                }
+                //如果获取失败则做相应的处理
+                String reason = "";
+                if (!status) {
+                    reason = intent.getStringExtra(Constants.CHECK_FAIL_REASON);
+                    Log.d(TAG, "receive:" + action + ",status:  " + status + ",reason  :" + reason);
+                    //人脸质量不合格
+                    if (action.equals(Constants.DETECT_RESULT_ACTION)) {
+                        if (reason.contains(Constants.DETECT_FAIL_REASON_FACE_SIZE_INCORRECT)) {
+                            mHandler.sendEmptyMessage(Constants.KEY_DETECT_FACE_SIZE_ERROR);
+                        } else if (reason.contains(Constants.DETECT_FAIL_REASON_NOFACE)) {
+                            mNirTipsView.setBackground(getResources().getDrawable(R.drawable.shap_nir_tip_default));
+                        } else if (reason.contains(Constants.DETECT_FAIL_REASON_FACE_ANGLE_INCORRECT)) {
+                            mHandler.sendEmptyMessage(Constants.KEY_DETECT_FACE_ANGLE_ERROR);
+                        } else if (reason.contains(Constants.DETECT_FAIL_REASON_FACE_QUALITY_TOO_LOW)) {
+                            mHandler.sendEmptyMessage(Constants.KEY_DETECT_FACE_QUALITY_ERROR);
+                        }
+                        //是否是活体
+                    } else if (action.equals(Constants.NIR_RESULT_ACTION)) {
+                        mNirTipsView.setBackground(getResources().getDrawable(R.drawable.shap_nir_tip_fail));
+                    }
+                } else {
+                    //人脸质量合格
+                    if (action.equals(Constants.DETECT_RESULT_ACTION)) {
+                        int facecount = intent.getIntExtra(Constants.FACE_COUNT, 0);
+                        String trackids = "";
+                        long trackid = 01;
+                        if (facecount > 0) {
+                            for (int i = 0; i < facecount; i++) {
+                                trackid = intent.getLongExtra(Constants.TRACK_ID + i, 0l);
+                                trackids = trackids + "," + trackid;
+                            }
+                        }
+                        Log.d("ascb", "DETECT_RESULT_ACTION: " + trackids);
+                    } else if (action.equals(Constants.NIR_RESULT_ACTION)) {
+                        long trackid = intent.getLongExtra(Constants.TRACK_ID, 0l);
+                        mNirTipsView.setBackground(getResources().getDrawable(R.drawable.shap_nir_tip_succ));
+                        Log.d("ascb", "NIR_RESULT_ACTION: " + trackid);
+                    } else if (action.equals(Constants.OFFLINE_RECOGNIZE_ACTION) || action.equals(Constants.ONLINE_RECOGNIZE_ACTION)) {
+                        long trackid = intent.getLongExtra(Constants.TRACK_ID, 0l);
+                        Log.d("ascb", "OFFLINE_RECOGNIZE_ACTION: " + trackid);
+                        username = intent.getStringExtra(Constants.USER_NAME);
+                        memberId = intent.getStringExtra(Constants.PERSON_ID);
+                        Log.d("ascb", "OFFLINE_RECOGNIZE_ACTION: " + memberId);
+                        Message msg = new Message();
+                        msg.what = Constants.KEY_DETECT_USER_NAME;
+                        Bundle b = new Bundle();
+                        b.putString(Constants.USER_NAME, username);
+                        msg.setData(b);
+                        mHandler.sendMessage(msg);
+                    }
+                }
+            }
+        }
+    }
+
+    @OnClick({R.id.main_menu})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.main_menu:
+                startActivity(MainActivity.getMainActivityIntent(DsyActivity.this));
+                finish();
+                break;
+        }
+    }
+
+    private boolean leftTop = false;
+    private boolean rightTop = false;
+    private boolean rightBottom = false;
+    private boolean leftBpttom = false;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+        if (x < 200 && y < 200) {
+            leftTop = true;
+            Log.d(TAG, "leftTop" + x + "，" + y);
+        } else if (x > 520 && y < 200) {
+            rightTop = true;
+            Log.d(TAG, "rightTop" + x + "，" + y);
+        } else if (x > 520 && y > 1080) {
+            rightBottom = true;
+            Log.d(TAG, "rightBottom" + x + "，" + y);
+        } else if (x < 200 && y > 1080) {
+            leftBpttom = true;
+            Log.d(TAG, "leftBpttom" + x + "，" + y);
+        }
+        if (leftTop && leftBpttom && rightBottom && rightTop) {
+            //MainApplication.getSerialPortUtils().closeSerialPort();
+            finish();
+        }
+        return super.onTouchEvent(event);
     }
 
     private Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
@@ -410,228 +622,6 @@ public class DsyActivity extends BaseActivity {
             dialog.cancel();
         }
         ableTag = true;
-    }
-
-    @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Constants.KEY_CLEAR:
-                    tvUsername.setText("");
-                    tvUsername.setHint("请先识别");
-                    tvBalance.setText("");
-                    tvBalance.setHint("请先识别");
-                    tvMoney.setText("");
-                    tvMoney.setHint("刷脸支付");
-                    break;
-                case Constants.KEY_SET_TEXT:
-                    String name = msg.getData().getString("name");
-                    double balance = msg.getData().getDouble("balance");
-                    int paycount = msg.getData().getInt("paycount");
-                    tvUsername.setText(name.substring(0, 10));
-                    tvBalance.setText(balance + "元");
-                    tvPaycount.setText(paycount + "次");
-                    break;
-                //如果人脸识别已打开，红外生物识别获取焦点，如果没打开则延迟重来
-                case Constants.KEY_OPEN_NIR_CAMERA:
-                    if (mRgbCameraView != null) {
-                        if (mRgbCameraView.hasOpened()) {
-                            mNirCameraView.onResume();
-                            mHandler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    dialog.dismiss();
-                                }
-                            }, 2000);
-                        } else {
-                            mCheckRgbCameraOpenCount++;
-                            mHandler.sendEmptyMessageDelayed(Constants.KEY_OPEN_NIR_CAMERA, Constants.OPEN_MIR_CAMERA_DELAY + mCheckRgbCameraOpenCount * 1000);
-                        }
-                    }
-                    break;
-                //隐藏显示的文字
-                case Constants.KEY_DETECT_HIDE:
-                    mHandler.removeMessages(Constants.KEY_DETECT_HIDE);
-                    Log.e(TAG, "hide detect result");
-                    if (mDetectResultView.getVisibility() != View.GONE) {
-                        mDetectResultView.setVisibility(View.GONE);
-                    }
-                    break;
-                //靠近一点提醒，后隐藏
-                case Constants.KEY_DETECT_FACE_SIZE_ERROR:
-                    mHandler.removeMessages(Constants.KEY_DETECT_FACE_SIZE_ERROR);
-                    Log.e(TAG, "face size incorrect");
-                    if (!Constants.SIZE_INCORRECT_TIPS.equals(mDetectResultView.getText())) {
-                        mDetectResultView.setText(Constants.SIZE_INCORRECT_TIPS);
-                    }
-                    if (mDetectResultView.getVisibility() != View.VISIBLE) {
-                        mDetectResultView.setVisibility(View.VISIBLE);
-                    }
-                    mHandler.sendEmptyMessageDelayed(Constants.KEY_DETECT_HIDE, 2000);
-                    break;
-                //摆正提醒，后隐藏
-                case Constants.KEY_DETECT_FACE_ANGLE_ERROR:
-                    mHandler.removeMessages(Constants.KEY_DETECT_FACE_ANGLE_ERROR);
-                    Log.e(TAG, "face angle incorrect");
-                    if (!Constants.ANGLE_INCORRECT_TIPS.equals(mDetectResultView.getText())) {
-                        mDetectResultView.setText(Constants.ANGLE_INCORRECT_TIPS);
-                    }
-                    if (mDetectResultView.getVisibility() != View.VISIBLE) {
-                        mDetectResultView.setVisibility(View.VISIBLE);
-                    }
-                    mHandler.sendEmptyMessageDelayed(Constants.KEY_DETECT_HIDE, 2000);
-                    break;
-                //提醒保持静止提醒，后隐藏
-                case Constants.KEY_DETECT_FACE_QUALITY_ERROR:
-                    mHandler.removeMessages(Constants.KEY_DETECT_FACE_QUALITY_ERROR);
-                    Log.e(TAG, "face quality incorrect");
-                    if (!Constants.QUALITY_INCORRECT_TIPS.equals(mDetectResultView.getText())) {
-                        mDetectResultView.setText(Constants.QUALITY_INCORRECT_TIPS);
-                    }
-                    if (mDetectResultView.getVisibility() != View.VISIBLE) {
-                        mDetectResultView.setVisibility(View.VISIBLE);
-                    }
-                    mHandler.sendEmptyMessageDelayed(Constants.KEY_DETECT_HIDE, 2000);
-                    break;
-                //显示识别获取的名字后隐藏
-                case Constants.KEY_DETECT_USER_NAME:
-                    mHandler.removeMessages(Constants.KEY_DETECT_USER_NAME);
-                    String username = msg.getData().getString(Constants.USER_NAME);
-                    if (!username.equals(mDetectResultView.getText())) {
-                        mDetectResultView.setText(username);
-                    }
-                    if (mDetectResultView.getVisibility() != View.VISIBLE) {
-                        mDetectResultView.setVisibility(View.VISIBLE);
-                    }
-                    mHandler.sendEmptyMessageDelayed(Constants.KEY_DETECT_HIDE, 2000);
-                    faceConsume();
-                    break;
-                default:
-                    break;
-            }
-            super.handleMessage(msg);
-        }
-    };
-
-
-    @OnClick({R.id.main_menu})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.main_menu:
-                startActivity(MainActivity.getMainActivityIntent(DsyActivity.this));
-                finish();
-                break;
-        }
-    }
-
-    public class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            //判断是否有信息
-            if (action != null && !action.equals("")) {
-                boolean status = intent.getBooleanExtra(Constants.CHECK_STATUS, false);
-                rgb_data = intent.getByteArrayExtra(Constants.RGB_DATA);
-                // 彩色摄像头抓到的人脸
-                if (rgb_data != null && rgb_data.length > 0) {
-                    Bitmap rgbBitmap = BitmapFactory.decodeByteArray(rgb_data, 0, rgb_data.length);
-                    mRgbFaceView.setImageBitmap(rgbBitmap);
-                    if (mShowCallbackFace) {
-                        mRgbFaceView.setVisibility(View.VISIBLE);
-                    }
-                }
-                //红外摄像头抓到的人脸
-                byte[] nir_data = intent.getByteArrayExtra(Constants.NIR_DATA);
-                if (nir_data != null && nir_data.length > 0) {
-                    Bitmap rgbBitmap = BitmapFactory.decodeByteArray(nir_data, 0, nir_data.length);
-                    mNirFaceView.setImageBitmap(rgbBitmap);
-                    if (mShowCallbackFace) {
-                        mNirFaceView.setVisibility(View.VISIBLE);
-                    }
-                }
-                //如果获取失败则做相应的处理
-                String reason = "";
-                if (!status) {
-                    reason = intent.getStringExtra(Constants.CHECK_FAIL_REASON);
-                    Log.d(TAG, "receive:" + action + ",status:  " + status + ",reason  :" + reason);
-                    //人脸质量不合格
-                    if (action.equals(Constants.DETECT_RESULT_ACTION)) {
-                        if (reason.contains(Constants.DETECT_FAIL_REASON_FACE_SIZE_INCORRECT)) {
-                            mHandler.sendEmptyMessage(Constants.KEY_DETECT_FACE_SIZE_ERROR);
-                        } else if (reason.contains(Constants.DETECT_FAIL_REASON_NOFACE)) {
-                            mNirTipsView.setBackground(getResources().getDrawable(R.drawable.shap_nir_tip_default));
-                        } else if (reason.contains(Constants.DETECT_FAIL_REASON_FACE_ANGLE_INCORRECT)) {
-                            mHandler.sendEmptyMessage(Constants.KEY_DETECT_FACE_ANGLE_ERROR);
-                        } else if (reason.contains(Constants.DETECT_FAIL_REASON_FACE_QUALITY_TOO_LOW)) {
-                            mHandler.sendEmptyMessage(Constants.KEY_DETECT_FACE_QUALITY_ERROR);
-                        }
-                        //是否是活体
-                    } else if (action.equals(Constants.NIR_RESULT_ACTION)) {
-                        mNirTipsView.setBackground(getResources().getDrawable(R.drawable.shap_nir_tip_fail));
-                    }
-                } else {
-                    //人脸质量合格
-                    if (action.equals(Constants.DETECT_RESULT_ACTION)) {
-                        int facecount = intent.getIntExtra(Constants.FACE_COUNT, 0);
-                        String trackids = "";
-                        long trackid = 01;
-                        if (facecount > 0) {
-                            for (int i = 0; i < facecount; i++) {
-                                trackid = intent.getLongExtra(Constants.TRACK_ID + i, 0l);
-                                trackids = trackids + "," + trackid;
-                            }
-                        }
-                        Log.d("ascb", "DETECT_RESULT_ACTION: " + trackids);
-                    } else if (action.equals(Constants.NIR_RESULT_ACTION)) {
-                        long trackid = intent.getLongExtra(Constants.TRACK_ID, 0l);
-                        mNirTipsView.setBackground(getResources().getDrawable(R.drawable.shap_nir_tip_succ));
-                        Log.d("ascb", "NIR_RESULT_ACTION: " + trackid);
-                    } else if (action.equals(Constants.OFFLINE_RECOGNIZE_ACTION) || action.equals(Constants.ONLINE_RECOGNIZE_ACTION)) {
-                        long trackid = intent.getLongExtra(Constants.TRACK_ID, 0l);
-                        Log.d("ascb", "OFFLINE_RECOGNIZE_ACTION: " + trackid);
-                        username = intent.getStringExtra(Constants.USER_NAME);
-                        memberId = intent.getStringExtra(Constants.PERSON_ID);
-                        Log.d("ascb", "OFFLINE_RECOGNIZE_ACTION: " + memberId);
-                        Message msg = new Message();
-                        msg.what = Constants.KEY_DETECT_USER_NAME;
-                        Bundle b = new Bundle();
-                        b.putString(Constants.USER_NAME, username);
-                        msg.setData(b);
-                        mHandler.sendMessage(msg);
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean leftTop = false;
-    private boolean rightTop = false;
-    private boolean rightBottom = false;
-    private boolean leftBpttom = false;
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
-        if (x < 200 && y < 200) {
-            leftTop = true;
-            Log.d(TAG, "leftTop" + x + "，" + y);
-        } else if (x > 520 && y < 200) {
-            rightTop = true;
-            Log.d(TAG, "rightTop" + x + "，" + y);
-        } else if (x > 520 && y > 1080) {
-            rightBottom = true;
-            Log.d(TAG, "rightBottom" + x + "，" + y);
-        } else if (x < 200 && y > 1080) {
-            leftBpttom = true;
-            Log.d(TAG, "leftBpttom" + x + "，" + y);
-        }
-        if (leftTop && leftBpttom && rightBottom && rightTop) {
-            //MainApplication.getSerialPortUtils().closeSerialPort();
-            finish();
-        }
-        return super.onTouchEvent(event);
     }
 
     /**

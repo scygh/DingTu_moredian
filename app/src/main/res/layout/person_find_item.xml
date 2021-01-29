@@ -12,7 +12,7 @@
         android:background="@color/white">
 
         <TextView
-            android:id="@+id/tv_wifiname"
+            android:id="@+id/tv_findname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

@@ -24,13 +24,12 @@ import butterknife.ButterKnife;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
-    public Api api;
+    public int pattern;//消费模式
     public String token;
+    public Api api;
     public String deviceId;
     public String conpanyCode;
-    public String pattern;
     public boolean isKeyEnable;
-    public int p;
 
     public abstract int layoutView();
 
@@ -39,23 +38,16 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(layoutView());
         ButterKnife.bind(this);
-        api = new Api();
+        pattern = SPUtils.getInstance().getInt(Constants.DEVICE_PATTERN);
         token = SPUtils.getInstance().getString(Constants.ACCESSTOKEN);
+        api = new Api();
         deviceId = SPUtils.getInstance().getString(Constants.MACHINE_NUMBER, "1");
         conpanyCode = SPUtils.getInstance().getInt(Constants.COMPANY_CODE) + "";
-        pattern = SPUtils.getInstance().getString(Constants.DEVICE_PATTERN);
         isKeyEnable = SPUtils.getInstance().getBoolean(Constants.KEY_ENABLE, false);
-        if (pattern.equals("手动消费")) {
-            p = 1;
-        } else if (pattern.equals("自动消费")) {
-            p = 2;
-        } else if (pattern.equals("定值消费")) {
-            p = 3;
-        }
-        if (NetUtil.isNetWorkConnected(this)) {
+
+        if (!NetUtil.isNetWorkConnected(this)) {
             ToastHelper.showToast("当前网络不可用！");
         }
-        //setLightMode();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }

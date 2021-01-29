@@ -1,189 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".view.activity.MachinesettingActivity">
+    android:gravity="center"
+    android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_width="@dimen/width_600"
+        android:layout_height="@dimen/height_100"
+        android:gravity="center_vertical">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_50"
-            android:layout_marginTop="@dimen/margin_20"
-            android:text="@string/machinesetting_machine_number"
+            android:layout_marginRight="@dimen/margin_10"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:text="@string/machine_number"
+            android:textColor="@color/textColorPrimary"
             android:textSize="@dimen/textSize_26" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_80"
-            android:layout_marginLeft="@dimen/margin_80"
-            android:layout_marginTop="@dimen/margin_20"
-            android:layout_marginRight="@dimen/margin_50"
-            android:gravity="center_vertical">
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="@drawable/machine_setting_edittext_bg"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_10"
-                android:layout_weight="1.5"
-                android:gravity="right"
-                android:text="@string/machine_number"
-                android:textSize="@dimen/textSize_26" />
-
-            <LinearLayout
-                android:layout_width="0dp"
+            <Spinner
+                android:id="@+id/machinesetting_machine_number"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="7"
-                android:background="@drawable/machine_setting_edittext_bg"
-                android:focusable="true"
-                android:focusableInTouchMode="true">
-
-                <Spinner
-                    android:id="@+id/machinesetting_machine_number"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="@dimen/margin_10"
-                    android:layout_marginRight="@dimen/margin_10"
-                    android:spinnerMode="dropdown"
-                    android:textSize="@dimen/textSize_26" />
-            </LinearLayout>
-
+                android:layout_marginLeft="@dimen/margin_10"
+                android:layout_marginRight="@dimen/margin_10"
+                android:spinnerMode="dropdown"
+                android:textSize="@dimen/textSize_26" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_80"
-            android:layout_marginLeft="@dimen/margin_50"
-            android:layout_marginTop="@dimen/margin_20"
-            android:layout_marginRight="@dimen/margin_50"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_10"
-                android:layout_weight="2"
-                android:gravity="right"
-                android:text="消费模式"
-                android:textSize="@dimen/textSize_26" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="7"
-                android:background="@drawable/machine_setting_edittext_bg"
-                android:focusable="true"
-                android:focusableInTouchMode="true">
-
-                <Spinner
-                    android:id="@+id/machinesetting_device_pattern"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="@dimen/margin_10"
-                    android:layout_marginRight="@dimen/margin_10"
-                    android:spinnerMode="dropdown"
-                    android:textSize="@dimen/textSize_26" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_50"
-            android:layout_marginTop="@dimen/margin_20"
-            android:text="@string/portandbaudrate"
-            android:textSize="@dimen/textSize_26"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_80"
-            android:layout_marginLeft="@dimen/margin_80"
-            android:layout_marginTop="@dimen/margin_20"
-            android:layout_marginRight="@dimen/margin_50"
-            android:gravity="center_vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_10"
-                android:layout_weight="1.5"
-                android:gravity="right"
-                android:text="@string/machinesetting_port"
-                android:textSize="@dimen/textSize_26" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="7"
-                android:background="@drawable/machine_setting_edittext_bg"
-                android:focusable="true"
-                android:focusableInTouchMode="true">
-
-                <Spinner
-                    android:id="@+id/machinesetting_port"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="@dimen/margin_10"
-                    android:layout_marginRight="@dimen/margin_10"
-                    android:spinnerMode="dropdown"
-                    android:textSize="@dimen/textSize_26" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_80"
-            android:layout_marginLeft="@dimen/margin_80"
-            android:layout_marginTop="@dimen/margin_20"
-            android:layout_marginRight="@dimen/margin_50"
-            android:gravity="center_vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_10"
-                android:layout_weight="1.5"
-                android:gravity="right"
-                android:text="@string/machinesetting_baudrate"
-                android:textSize="@dimen/textSize_26" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="7"
-                android:background="@drawable/machine_setting_edittext_bg"
-                android:focusable="true"
-                android:focusableInTouchMode="true">
-
-                <EditText
-                    android:id="@+id/machinesetting_baudrate"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="@dimen/margin_10"
-                    android:layout_marginRight="@dimen/margin_10"
-                    android:background="@null"
-                    android:textCursorDrawable="@null"
-                    android:textSize="@dimen/textSize_26" />
-            </LinearLayout>
-        </LinearLayout>
     </LinearLayout>
 
-    <include
-        layout="@layout/bottom_btn_layout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/height_80"
-        android:layout_alignParentBottom="true"
-        android:visibility="gone" />
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="@dimen/width_600"
+        android:layout_height="@dimen/height_100"
+        android:layout_marginTop="@dimen/margin_20"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/margin_10"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:text="消费模式"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="@dimen/textSize_26" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="@drawable/machine_setting_edittext_bg"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
+
+            <Spinner
+                android:id="@+id/machinesetting_device_pattern"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/margin_10"
+                android:layout_marginRight="@dimen/margin_10"
+                android:spinnerMode="dropdown"
+                android:textSize="@dimen/textSize_26" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
+

@@ -37,7 +37,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_margin="@dimen/margin_100"
-            android:backgroundTint="@color/colorPrimaryDark"
+            android:backgroundTint="@color/white"
             android:background="@color/colorPrimaryDark"
             app:borderWidth="0dp"
             android:src="@mipmap/riqi"/>

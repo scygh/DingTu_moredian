@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.moredian.entrance.guard.R;
+import com.moredian.entrance.guard.app.MainApplication;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -69,7 +70,7 @@ public class MainActivity extends BaseActivity {
                 startActivity(PersonsManageActivity.getPersonsManageActivityIntent(this));
                 break;
             case R.id.main_ll3:
-                startActivity(ConsumeRecordActivity.getConsumeRecordActivityIntent(this));
+                startActivity(new Intent(MainActivity.this, RecordActivity.class));
                 break;
             case R.id.main_ll4:
                 startActivity(PersonalSettingActivity.getPersonalSettingActivityIntent(this));

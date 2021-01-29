@@ -33,7 +33,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:appComponentFactory">
-
+        <activity android:name=".view.activity.RecordActivity"></activity>
         <activity android:name=".view.activity.ChartActivity" />
         <activity android:name=".view.activity.RecordDetailActivity" />
         <activity android:name=".view.activity.ConsumeRecordActivity" />
