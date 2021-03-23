@@ -13,6 +13,8 @@ import com.moredian.entrance.guard.constant.Constants;
 import com.moredian.entrance.guard.R;
 import com.moredian.entrance.guard.entity.GetDevicePattern;
 import com.moredian.entrance.guard.http.Api;
+import com.moredian.entrance.guard.task.MainTask;
+import com.moredian.entrance.guard.task.TaskParams;
 import com.moredian.entrance.guard.utils.ToastHelper;
 
 
@@ -71,7 +73,6 @@ public class LoginActivity extends BaseActivity {
                     if (devicePattern == 1) {
 
                     } else if (devicePattern == 2) {
-
                         SPUtils.getInstance().put(Constants.AUTO_AMOUNT, ((GetDevicePattern) o).getContent().getAutoAmount(), true);
                     } else if (devicePattern == 3) {
 
@@ -87,7 +88,17 @@ public class LoginActivity extends BaseActivity {
                 ToastHelper.showToast(err);
             }
         });
+        //TODO
+        // updateApk();
+    }
 
+    /**
+    * descirption: 检查更新
+    */
+    private void updateApk() {
+        TaskParams params = new TaskParams();
+        MainTask.UpdateTask dbTask = new MainTask.UpdateTask(this, false);
+        dbTask.execute(params);
     }
 
     @OnClick({R.id.login_btn, R.id.iv_come_back})

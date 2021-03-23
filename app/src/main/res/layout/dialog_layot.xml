@@ -35,8 +35,8 @@
         android:lineSpacingExtra="3dp"
         android:lineSpacingMultiplier="1.2"
         android:textColor="#999999"
-        android:textSize="20sp"
-        tools:text="已识别您的人脸信息，请确认支付" />
+        android:textSize="28sp"
+        tools:text="请确认支付" />
 
     <View
         android:layout_width="match_parent"

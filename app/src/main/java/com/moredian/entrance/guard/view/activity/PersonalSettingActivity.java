@@ -9,6 +9,8 @@ import android.widget.TextView;
 import com.blankj.utilcode.util.SPUtils;
 import com.moredian.entrance.guard.R;
 import com.moredian.entrance.guard.constant.Constants;
+import com.moredian.entrance.guard.task.MainTask;
+import com.moredian.entrance.guard.task.TaskParams;
 import com.moredian.entrance.guard.utils.CleanDataUtils;
 import com.moredian.entrance.guard.utils.ToastHelper;
 
@@ -76,6 +78,9 @@ public class PersonalSettingActivity extends BaseActivity {
                 startActivity(NetSettingActivity.getNetSettingActivityIntent(this));
                 break;
             case R.id.aps_checkforupdate:
+                TaskParams params = new TaskParams();
+                MainTask.UpdateTask dbTask = new MainTask.UpdateTask(this, false);
+                dbTask.execute(params);
                 break;
         }
     }

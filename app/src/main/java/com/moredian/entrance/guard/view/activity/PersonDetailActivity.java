@@ -57,17 +57,14 @@ public class PersonDetailActivity extends BaseActivity {
     TextView persondetailTelephone;
     @BindView(R.id.persondetail_camera)
     ImageView persondetailCamera;
-    @BindView(R.id.personDetail_create)
-    TextView personDetailCreate;
+    @BindView(R.id.personDetail_createupdate)
+    TextView personDetailCreateUpdate;
     @BindView(R.id.personDetail_delete)
     TextView personDetailDelete;
 
     private Bitmap bitmap;
     private Intent dataIntent;
-    //判断返回的memberID是否和当前一致
-    private boolean istheSameFace = false;
     //当前的memberID
-    private String exitmemberId;
     //获取的page
     List<GetListByPage.ContentBean.RowsBean> arowsBeans = new ArrayList<>();
     //查询传入
@@ -85,7 +82,6 @@ public class PersonDetailActivity extends BaseActivity {
                     setData(findbean);
                     break;
                 case 2:
-                    exitmemberId = null;
                     persondetailCamera.setImageResource(R.mipmap.icon_camera);
                     break;
 
@@ -157,15 +153,13 @@ public class PersonDetailActivity extends BaseActivity {
 
             @Override
             public void onFail(String err) {
-                if (err.equals("人脸已存在")) {
-                    deletePerson();
-                }
+                ToastHelper.showToast(err);
             }
         });
         api.setOnCreate(new Api.OnCreate() {
             @Override
             public void created() {
-                updatePerson();
+                personDetailCreateUpdate.setText("添加人脸");
             }
         });
     }
@@ -176,11 +170,15 @@ public class PersonDetailActivity extends BaseActivity {
      */
     private void setData(ApiUserGet.ContentBean findbean) {
         mBroccoli.removeAllPlaceholders();
+        if (findbean.getUserFace() != null) {
+            personDetailCreateUpdate.setText("添加人脸");
+        } else {
+            personDetailCreateUpdate.setText("创建人员");
+        }
         persondetailName.setText(findbean.getUser().getName());
         persondetailStunum.setText(findbean.getUser().getCreateTime());
         persondetailTelephone.setText(findbean.getUser().getPhone());
         if (findbean.getUserFace() != null) {
-            exitmemberId = findbean.getUserFace().getMemberId();
             if (!TextUtils.isEmpty(findbean.getUserFace().getMemberBase64())) {
                 bitmap = Base64BitmapUtil.base64ToBitmap(findbean.getUserFace().getMemberBase64());
                 GlideIn();
@@ -188,13 +186,17 @@ public class PersonDetailActivity extends BaseActivity {
         }
     }
 
-    @OnClick({R.id.persondetail_camera, R.id.personDetail_create, R.id.personDetail_delete, R.id.personDetail_chongzhi, R.id.personDetail_xiaohu})
+    @OnClick({R.id.persondetail_camera, R.id.personDetail_createupdate, R.id.personDetail_delete, R.id.personDetail_chongzhi, R.id.personDetail_xiaohu})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.persondetail_camera:
                 break;
-            case R.id.personDetail_create:
-                startActivityForResult(FaceInputActivity.getFaceInputActivityIntent(PersonDetailActivity.this), Constants.FACE_INPUT_REQUESTCODE);
+            case R.id.personDetail_createupdate:
+                if (personDetailCreateUpdate.getText().equals("添加人脸")) {
+                    startActivityForResult(FaceInputActivity.getFaceInputActivityIntent(PersonDetailActivity.this), Constants.FACE_INPUT_REQUESTCODE);
+                } else if (personDetailCreateUpdate.getText().equals("创建人员")) {
+                    createPerson();
+                }
                 break;
             case R.id.personDetail_delete:
                 deletePerson();
@@ -258,21 +260,6 @@ public class PersonDetailActivity extends BaseActivity {
     }
 
     /**
-     * descirption: 判断人脸是否已经录入
-     */
-    private void createCheck() {
-        if (TextUtils.isEmpty(exitmemberId)) {//已创建就不会再创建
-            if (bitmap != null) {
-                createPerson();
-            } else {
-                ToastHelper.showToast("捕捉的人脸图片为空");
-            }
-        } else {
-            ToastHelper.showToast("该用户已添加人脸");
-        }
-    }
-
-    /**
      * descirption: 更新人脸
      */
     private synchronized void updatePerson() {
@@ -292,15 +279,11 @@ public class PersonDetailActivity extends BaseActivity {
             byte[] image = data.getByteArrayExtra(Constants.INTENT_FACEINPUT_RGBDATA);
             memberId = data.getStringExtra(Constants.INTENT_FACEINPUT_MEMBERID);
             if (!TextUtils.isEmpty(memberId)) {//已经录入过的人脸识别到了memberid
-                if (!TextUtils.isEmpty(exitmemberId)) {
-                    if (memberId == exitmemberId) {//是否是同一个人
-                        istheSameFace = true;
-                    }
-                }
-                ToastHelper.showToast("你已经录入过人脸了");
+                Log.d("faceinfo", "memberId" + memberId);
+                ToastHelper.showToast("你已经录入过人脸了!");
             } else {//没录入的就去设置头像，创建人员
                 setImage(image);
-                createCheck();
+                updatePerson();
             }
         }
     }
@@ -325,15 +308,11 @@ public class PersonDetailActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        istheSameFace = false;
         if (arowsBeans != null) {
             arowsBeans.clear();
         }
         if (bitmap != null) {
             bitmap = null;
-        }
-        if (exitmemberId != null) {
-            exitmemberId = null;
         }
         userid = null;
         handler.removeCallbacksAndMessages(null);

@@ -23,8 +23,6 @@ import butterknife.OnClick;
 
 public class ConsumeResultActivity extends BaseActivity {
 
-    @BindView(R.id.cs_over)
-    TextView csOver;
     @BindView(R.id.cs_amount_big)
     TextView csAmountBig;
     @BindView(R.id.cs_consume_kind)
@@ -83,7 +81,7 @@ public class ConsumeResultActivity extends BaseActivity {
             csConsumeResult.setText("支付成功");
             csAmountBig.setText(facecontentbean.getExpenseDetail().getAmount() + "");
             csAmountSmall.setText(facecontentbean.getExpenseDetail().getAmount() + "");
-            csBalance.setText(facecontentbean.getExpenseDetail().getBalance() + "");
+            csBalance.setText(facecontentbean.getExpenseDetail().getBalance() + "元");
             csDate.setText(time);
             csConsumeKind.setText("人脸支付");
             csConsumePattern.setText("自动消费");
@@ -97,12 +95,9 @@ public class ConsumeResultActivity extends BaseActivity {
         myTime.start();
     }
 
-    @OnClick({R.id.cs_over, R.id.continue_consume})
+    @OnClick({R.id.continue_consume})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.cs_over:
-                finish();
-                break;
             case R.id.continue_consume:
                 finish();
                 break;

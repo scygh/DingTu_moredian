@@ -18,7 +18,7 @@ import android.widget.TextView;
 public class SpinnerAdapter extends ArrayAdapter<String> {
 
     private Context mContext;
-    private String [] mStringArray;
+    private String[] mStringArray;
 
     public SpinnerAdapter(Context context, String[] stringArray) {
         super(context, android.R.layout.simple_spinner_item, stringArray);

@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,11 +15,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -35,22 +30,16 @@ import com.blankj.utilcode.util.SPUtils;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechUtility;
 import com.moredian.entrance.guard.R;
-import com.moredian.entrance.guard.app.MainApplication;
 import com.moredian.entrance.guard.constant.Constants;
-import com.moredian.entrance.guard.entity.FaceExpense;
 import com.moredian.entrance.guard.entity.GetDevicePattern;
-import com.moredian.entrance.guard.entity.GetMealList;
 import com.moredian.entrance.guard.entity.MoredianExpense;
 import com.moredian.entrance.guard.entity.MoredianExpenseRequest;
-import com.moredian.entrance.guard.entity.PostFaceExpenseBody;
 import com.moredian.entrance.guard.face.CameraUtil;
 import com.moredian.entrance.guard.face.CameraView;
 import com.moredian.entrance.guard.face.drawface.DrawerSurfaceView;
 import com.moredian.entrance.guard.http.Api;
-import com.moredian.entrance.guard.http.retrofit.PostMoreDianExpense;
 import com.moredian.entrance.guard.utils.AudioUtils;
 import com.moredian.entrance.guard.utils.ToastHelper;
-import com.moredian.entrance.guard.view.adapter.MealPagerAdapter;
 import com.moredian.entrance.guard.view.designview.ComonDialog;
 import com.moredian.entrance.guard.view.designview.PayDialog;
 
@@ -134,6 +123,7 @@ public class DsyActivity extends BaseActivity {
 
     @Override
     public void initView() {
+        //是否可支付switch
         able_switch.setChecked(true);
         able_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -145,10 +135,6 @@ public class DsyActivity extends BaseActivity {
                 }
             }
         });
-        //自动消费显示消费金额
-        if (pattern == 2) {
-            tvMoney.setText(SPUtils.getInstance().getFloat(Constants.AUTO_AMOUNT) + "");
-        }
         //下拉刷新重新获取消费模式和自动消费金额
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -156,6 +142,7 @@ public class DsyActivity extends BaseActivity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        //使用机器前请设置好机器号
                         api.getDevicePattern(Integer.parseInt(deviceId), token);
                         refreshLayout.setRefreshing(false);
                     }
@@ -219,7 +206,6 @@ public class DsyActivity extends BaseActivity {
                 if (o instanceof MoredianExpense) {//人脸消费
                     AudioUtils.getInstance().speakText("支付" + ((MoredianExpense) o).getContent().getExpenseDetail().getAmount() + "元");
                     startActivity(ConsumeResultActivity.getFaceConsumeSuccessActivityIntent(DsyActivity.this, ((MoredianExpense) o).getContent()));
-                    updateText(((MoredianExpense) o).getContent().getExpenseDetail().getUserId(), ((MoredianExpense) o).getContent().getExpenseDetail().getBalance());
                 } else if (o instanceof GetDevicePattern) {//重新获取消费模式和自动金额
                     int devicePattern = ((GetDevicePattern) o).getContent().getPattern();
                     if (devicePattern == 1) {
@@ -239,23 +225,10 @@ public class DsyActivity extends BaseActivity {
 
             @Override
             public void onFail(String err) {
+                ToastHelper.showToast(err);
                 startActivity(ConsumeResultActivity.getConsumeFailActivityIntent(DsyActivity.this));
             }
         });
-    }
-
-    /**
-     * descirption: 更新数据
-     */
-    private void updateText(String name, double balance) {
-        Message message = Message.obtain();
-        Bundle bundle = new Bundle();
-        bundle.putString("name", name);
-        bundle.putDouble("balance", balance);
-        message.setData(bundle);
-        message.what = Constants.KEY_SET_TEXT;
-        mHandler.sendMessage(message);
-        mHandler.sendEmptyMessageDelayed(Constants.KEY_CLEAR, 3000);
     }
 
     /**
@@ -267,10 +240,9 @@ public class DsyActivity extends BaseActivity {
                 String money = tvMoney.getText().toString();
                 if (Double.parseDouble(money) > 0) {
                     if (pattern == 2) {
-                        AudioUtils.getInstance().speakText("请确认支付金额");
                         initDialog(money);
                     } else {
-                        ToastHelper.showToast("消费模式错误");
+                        ToastHelper.showToast("请切换为自动消费模式");
                     }
                 } else {
                     ToastHelper.showToast("金额必须大于零才能消费");
@@ -287,20 +259,28 @@ public class DsyActivity extends BaseActivity {
      * descirption: 确认支付弹窗
      */
     private ComonDialog comonDialog;
+    private boolean consumeing = false;
 
     private void initDialog(String money) {
-        if (comonDialog != null) {
+        if (comonDialog != null || consumeing) {
             return;
         }
+        consumeing = true;
+        AudioUtils.getInstance().speakText("请确认支付金额");
         comonDialog = new ComonDialog(DsyActivity.this);
-        comonDialog.setMessage("已识别到人脸，请您确认支付：自动消费" + money + "元。");
+        comonDialog.setMessage("请确认支付：自动消费" + money + "元。");
         comonDialog.setTitle("支付提示")
                 .setSingle(false).setOnClickBottomListener(new ComonDialog.OnClickBottomListener() {
             @Override
             public void onPositiveClick() {
                 comonDialog.dismiss();
-                MoredianExpenseRequest postFaceExpenseBody = new MoredianExpenseRequest(Double.parseDouble(money), 2, 0, "", memberId);
-                api.postFaceExpense(Integer.parseInt(conpanyCode), Integer.parseInt(deviceId), postFaceExpenseBody, token);
+                if (isKeyEnable == true) {
+                    createPayDialog(money);
+                } else {
+                    //TODO
+                    MoredianExpenseRequest postFaceExpenseBody = new MoredianExpenseRequest(Double.parseDouble(money), 2, 1, "", memberId);
+                    api.postFaceExpense(Integer.parseInt(conpanyCode), Integer.parseInt(deviceId), postFaceExpenseBody, token);
+                }
                 comonDialog = null;
             }
 
@@ -308,8 +288,33 @@ public class DsyActivity extends BaseActivity {
             public void onNegtiveClick() {
                 comonDialog.dismiss();
                 comonDialog = null;
+                consumeing = false;
             }
         }).show();
+    }
+
+    /**
+     * descirption: 密码框
+     */
+    PayDialog payDialog = null;
+
+    public void createPayDialog(String money) {
+        if (payDialog == null) {
+            payDialog = new PayDialog(this);
+            payDialog.setPasswordCallback(new PayDialog.PasswordCallback() {
+                @Override
+                public void callback(String password) {
+                    MoredianExpenseRequest postFaceExpenseBody = new MoredianExpenseRequest(Double.parseDouble(money), 2, 0, password, memberId);
+                    api.postFaceExpense(Integer.parseInt(conpanyCode), Integer.parseInt(deviceId), postFaceExpenseBody, token);
+                    payDialog.dismiss();
+                }
+            });
+        }
+        payDialog.clearPasswordText();
+        payDialog.setMoney(tvMoney.getText().toString().trim());
+        payDialog.show();
+        payDialog.setCancelable(false);
+        payDialog.setCanceledOnTouchOutside(false);
     }
 
     @SuppressLint("HandlerLeak")
@@ -558,6 +563,13 @@ public class DsyActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        //自动消费显示消费金额
+        if (pattern == 2) {
+            tvMoney.setText(SPUtils.getInstance().getFloat(Constants.AUTO_AMOUNT) + "");
+            consumeing = false;
+        } else {
+            ToastHelper.showToast("请切换为自动消费模式");
+        }
         if (mRgbCameraView != null) {
             mRgbCameraView.onResume();
         }
@@ -623,28 +635,5 @@ public class DsyActivity extends BaseActivity {
         }
         ableTag = true;
     }
-
-    /**
-     * descirption: 密码框
-     */
-    /*PayDialog payDialog = null;
-    public void createPayDialog(String money) {
-        if (payDialog == null) {
-            payDialog = new PayDialog(this);
-            payDialog.setPasswordCallback(new PayDialog.PasswordCallback() {
-                @Override
-                public void callback(String password) {
-                    MoredianExpenseRequest postFaceExpenseBody = new MoredianExpenseRequest(Double.parseDouble(money), p, 1, "", memberId);
-                    api.postFaceExpense(Integer.parseInt(conpanyCode), Integer.parseInt(deviceId), postFaceExpenseBody, token);
-                    payDialog.dismiss();
-                }
-            });
-        }
-        payDialog.clearPasswordText();
-        payDialog.setMoney(tvMoney.getText().toString().trim());
-        payDialog.show();
-        payDialog.setCancelable(false);
-        payDialog.setCanceledOnTouchOutside(false);
-    }*/
 
 }

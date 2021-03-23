@@ -4,27 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/white"
     android:orientation="vertical"
     tools:context=".view.activity.ConsumeResultActivity">
 
-    <TextView
-        android:id="@+id/cs_over"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginTop="@dimen/margin_40"
-        android:layout_marginRight="@dimen/margin_40"
-        android:text="@string/consume_over"
-        android:textColor="@color/colorPrimary"
-        android:textSize="@dimen/textSize_35"
-        android:visibility="gone" />
 
     <ImageView
         android:layout_width="@dimen/width_80"
         android:layout_height="@dimen/height_80"
         android:layout_gravity="center_horizontal"
-        android:layout_margin="@dimen/margin_60"
+        android:layout_margin="@dimen/margin_25"
         android:scaleType="centerCrop"
         android:src="@mipmap/ic_launcher" />
 
@@ -34,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="@string/consume_success"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/textColorPrimary"
         android:textSize="@dimen/textSize_35" />
 
     <LinearLayout
@@ -44,11 +33,12 @@
         android:layout_margin="@dimen/margin_20"
         android:gravity="center_horizontal">
 
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="￥"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/textColorPrimary"
             android:textSize="@dimen/textSize_40" />
 
         <TextView
@@ -56,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1.00"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/textColorPrimary"
             android:textSize="@dimen/textSize_80" />
     </LinearLayout>
 
@@ -73,7 +63,8 @@
             android:layout_marginTop="@dimen/margin_10"
             android:layout_marginRight="@dimen/margin_40"
             android:layout_marginBottom="@dimen/margin_10"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -115,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:text="1000.00元"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/textColorPrimary"
                 android:textSize="@dimen/textSize_28" />
         </RelativeLayout>
 
@@ -126,7 +117,8 @@
             android:layout_marginTop="@dimen/margin_10"
             android:layout_marginRight="@dimen/margin_40"
             android:layout_marginBottom="@dimen/margin_10"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -167,7 +159,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:text="2019-07-26 15:49:00"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/textColorPrimary"
                 android:textSize="@dimen/textSize_28" />
         </RelativeLayout>
 
@@ -193,7 +185,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:text="自动扣款"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/textColorPrimary"
                 android:textSize="@dimen/textSize_28" />
         </RelativeLayout>
 
@@ -201,8 +193,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_marginTop="@dimen/margin_50"
+        android:layout_height="wrap_content"
         android:gravity="center">
 
         <TextView
@@ -210,7 +201,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="60"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/textColorPrimary"
             android:textSize="@dimen/textSize_30" />
 
         <TextView
@@ -218,7 +209,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="秒后自动跳转"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/textColorPrimary"
             android:textSize="@dimen/textSize_26" />
     </LinearLayout>
 
@@ -226,12 +217,12 @@
         android:id="@+id/continue_consume"
         android:layout_width="match_parent"
         android:layout_height="@dimen/height_80"
+        android:layout_gravity="bottom"
         android:layout_margin="@dimen/margin_40"
         android:background="@color/colorPrimary"
         android:gravity="center"
         android:text="继续消费"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="@dimen/textSize_26"
-        android:layout_gravity="bottom"/>
+        android:textColor="@color/white"
+        android:textSize="@dimen/textSize_26" />
 
 </LinearLayout>

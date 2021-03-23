@@ -5,12 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
+    android:gravity="center"
     tools:context=".view.activity.RecordActivity">
 
     <TextView
         android:id="@+id/record_tv_voucher"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="200dp"
         android:layout_margin="@dimen/margin_50"
         android:layout_weight="1"
         android:background="@color/colorPrimary"
@@ -22,7 +23,7 @@
     <TextView
         android:id="@+id/record_tv_consume"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="200dp"
         android:layout_marginTop="@dimen/margin_50"
         android:layout_marginBottom="@dimen/margin_50"
         android:layout_weight="1"
@@ -35,7 +36,7 @@
     <TextView
         android:id="@+id/record_tv_sevendays"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="200dp"
         android:layout_margin="@dimen/margin_50"
         android:layout_weight="1"
         android:background="@color/colorPrimary"

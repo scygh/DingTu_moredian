@@ -19,5 +19,5 @@ import retrofit2.http.Query;
 public interface PostSetDevicePattern {
 
     @POST("Api/Device/Update")
-    Observable<PostResponse> postSetDevicePattern(@Body PostUpdateDevice postUpdateDevice, @Header("AccessToken") String token);
+    Observable<PostResponse> postSetDevicePattern(@Query("Id") int id, @Query("Pattern") String patternId, @Header("AccessToken") String token);
 }

@@ -229,6 +229,7 @@ public class Api {
                         if (postResponse != null && postResponse.getStatusCode() == 200) {
                             if (onCreate != null) {
                                 onCreate.created();
+                                ToastHelper.showToast("创建人员成功！");
                             }
                         } else {
                             ToastHelper.showToast(postResponse.getMessage());
@@ -935,10 +936,7 @@ public class Api {
      * descirption: 获取设备号对应的餐段
      */
     public void setDevicePattern(Integer id, String pattern, String token) {
-        PostUpdateDevice postUpdateDevice = new PostUpdateDevice();
-        postUpdateDevice.setId(id);
-        postUpdateDevice.setPattern(pattern);
-        ApiUtils.setDevicePattern().postSetDevicePattern(postUpdateDevice, token)
+        ApiUtils.setDevicePattern().postSetDevicePattern(id, pattern, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<PostResponse>() {

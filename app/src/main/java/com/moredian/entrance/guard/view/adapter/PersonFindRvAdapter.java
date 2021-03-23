@@ -90,9 +90,11 @@ public class PersonFindRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 textView.setEnabled(true);
             }
             if (rowsBeans.get(getAdapterPosition()).getUserFace() != null) {
-                tvIsfaceinput.setVisibility(View.VISIBLE);
-            } else {
-                tvIsfaceinput.setVisibility(View.GONE);
+                if (rowsBeans.get(getAdapterPosition()).getUserFace().getMemberBase64() != null) {
+                    tvIsfaceinput.setVisibility(View.VISIBLE);
+                } else {
+                    tvIsfaceinput.setVisibility(View.GONE);
+                }
             }
         }
     }

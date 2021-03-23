@@ -359,18 +359,7 @@ public class FaceInputActivity extends BaseActivity {
                     }
                 } else {
                     //人脸质量合格
-                    if (action.equals(Constants.OFFLINE_RECOGNIZE_ACTION) || action.equals(Constants.ONLINE_RECOGNIZE_ACTION)) {
-                        Log.d(TAG, "OFFLINE_RECOGNIZE_ACTION: " + System.currentTimeMillis());
-                        long trackid = intent.getLongExtra(Constants.TRACK_ID, 0l);
-                        String username = intent.getStringExtra(Constants.USER_NAME);
-                        memberId = intent.getStringExtra(Constants.PERSON_ID);
-                        Message msg = new Message();
-                        msg.what = Constants.KEY_DETECT_USER_NAME;
-                        Bundle b = new Bundle();
-                        b.putString(Constants.USER_NAME, username);
-                        msg.setData(b);
-                        mHandler.sendMessage(msg);
-                    } else if (action.equals(Constants.DETECT_RESULT_ACTION)) {
+                    if (action.equals(Constants.DETECT_RESULT_ACTION)) {
                         int facecount = intent.getIntExtra(Constants.FACE_COUNT, 0);
                         String trackids = "";
                         long trackid = 0l;
@@ -391,6 +380,17 @@ public class FaceInputActivity extends BaseActivity {
                                 imageCheck();
                             }
                         }, 2000);
+                    } else if (action.equals(Constants.OFFLINE_RECOGNIZE_ACTION) || action.equals(Constants.ONLINE_RECOGNIZE_ACTION)) {
+                        Log.d(TAG, "OFFLINE_RECOGNIZE_ACTION: " + System.currentTimeMillis());
+                        long trackid = intent.getLongExtra(Constants.TRACK_ID, 0l);
+                        String username = intent.getStringExtra(Constants.USER_NAME);
+                        memberId = intent.getStringExtra(Constants.PERSON_ID);
+                        Message msg = new Message();
+                        msg.what = Constants.KEY_DETECT_USER_NAME;
+                        Bundle b = new Bundle();
+                        b.putString(Constants.USER_NAME, username);
+                        msg.setData(b);
+                        mHandler.sendMessage(msg);
                     }
                 }
             }

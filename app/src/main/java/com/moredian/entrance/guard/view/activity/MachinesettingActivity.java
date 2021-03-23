@@ -48,12 +48,12 @@ public class MachinesettingActivity extends BaseActivity {
         //消费模式
         String[] devicePattern = getResources().getStringArray(R.array.devicepattern);
         machinesettingDevicePattern.setAdapter(new SpinnerAdapter(this, devicePattern));
-        String pattern = SPUtils.getInstance().getString(Constants.DEVICE_PATTERN);
-        for (int k = 0; k < devicePattern.length; k++) {
-            if (devicePattern[k].equals(pattern)) {
-                machinesettingDevicePattern.setSelection(k);
-                break;
-            }
+        if (pattern == 1) {
+            machinesettingDevicePattern.setSelection(0);
+        } else if (pattern == 2) {
+            machinesettingDevicePattern.setSelection(1);
+        } else if (pattern == 3) {
+            machinesettingDevicePattern.setSelection(2);
         }
     }
 
@@ -110,18 +110,19 @@ public class MachinesettingActivity extends BaseActivity {
         String devicepattern = (String) machinesettingDevicePattern.getSelectedItem();
         SPUtils.getInstance().put(Constants.MACHINE_NUMBER, machineNumber);
 
-        SPUtils.getInstance().put(Constants.DEVICE_PATTERN, devicepattern);
-        String pattern = "";
+        int pattern = 0;
         if (devicepattern.equals("手动消费")) {
-            pattern = "1";
+            pattern = 1;
         } else if (devicepattern.equals("自动消费")) {
-            pattern = "2";
+            pattern = 2;
         } else if (devicepattern.equals("定值消费")) {
-            pattern = "3";
+            pattern = 3;
         }
-        PostsetDevicePattern postsetDevicePattern = new PostsetDevicePattern(SPUtils.getInstance().getFloat(Constants.AUTO_AMOUNT) + "", pattern);
+        SPUtils.getInstance().put(Constants.DEVICE_PATTERN, pattern);
+
+        PostsetDevicePattern postsetDevicePattern = new PostsetDevicePattern(SPUtils.getInstance().getFloat(Constants.AUTO_AMOUNT) + "", pattern + "");
         if (machineNumber != null) {
-            api.setDevicePattern(Integer.parseInt(machineNumber), pattern, token);
+            api.setDevicePattern(Integer.parseInt(machineNumber), pattern + "", token);
         }
         super.onStop();
     }

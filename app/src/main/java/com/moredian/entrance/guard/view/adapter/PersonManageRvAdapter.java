@@ -73,7 +73,7 @@ public class PersonManageRvAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         public void bind() {
             String name = rowsBeans.get(getAdapterPosition()).getUser().getName();
-            tvUsername.setText(name+"");
+            tvUsername.setText(name + "");
             int state = rowsBeans.get(getAdapterPosition()).getUser().getState();
             if (state == 3) {
                 tvUserstate.setText("已销户");
@@ -83,9 +83,11 @@ public class PersonManageRvAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 relativeLayout.setEnabled(true);
             }
             if (rowsBeans.get(getAdapterPosition()).getUserFace() != null) {
-                tvIsfaceinput.setVisibility(View.VISIBLE);
-            } else {
-                tvIsfaceinput.setVisibility(View.GONE);
+                if (rowsBeans.get(getAdapterPosition()).getUserFace().getMemberBase64() != null) {
+                    tvIsfaceinput.setVisibility(View.VISIBLE);
+                } else {
+                    tvIsfaceinput.setVisibility(View.GONE);
+                }
             }
         }
     }
